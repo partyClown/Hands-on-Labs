@@ -40,31 +40,50 @@
 
   <script>
     
-    const INIT_POS = {
-      lat: -8.7984047,
-      lng: 115.1698715,
-    };
-    const ZOOM = 13;
-    const CAPTION = "<b>Kantor:</b> Rektorat Universitas Udayana.";
+    const mapObj = [
+      {
+        pos: {
+          lat: -8.7984047,
+          lng: 115.1698715,
+        },
+        caption: "<b>Kantor:</b> Rektorat Universitas Udayana."
+      },
+      {
+        pos: {
+          lat: -8.656023429787052, 
+          lng: 115.21631667750822,
+        },
+        caption: "<b>Kantor:</b> Wali Kota Denpasar."
+      }
+    ];
+    
+    const ZOOM = 11;
 
     // leaflet
-    const leafletMap = L.map('leaflet-map').setView(INIT_POS, ZOOM);
+    const leafletMap = L.map('leaflet-map').setView(mapObj[1].pos, ZOOM);
 
     const mapTile = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(leafletMap);
 
-    const leafletMarker = L.marker(INIT_POS).addTo(leafletMap).bindPopup(CAPTION).openPopup();
+    const leafletMarker = mapObj.map((x) => {
+      const lMarker = L.marker(x.pos).addTo(leafletMap).bindPopup(x.caption);
+
+      lMarker.on('click', () => {
+        lMarker.openPopup();
+      });
+    });
+
 
     // google map
     const googleMapElement = document.getElementById('google-map');
     const googleMap = new google.maps.Map(googleMapElement, {
-      center : INIT_POS,
+      center : mapObj[0].pos,
       zoom: ZOOM,
     });
 
     const googleMapMarker = new google.maps.Marker({
-      position: INIT_POS,
+      position: mapObj[0].pos,
       map: googleMap,
     });
 
@@ -72,7 +91,7 @@
 
     googleMapMarker.addListener('click', () => {
       infoWindow.close();
-      infoWindow.setContent(CAPTION);
+      infoWindow.setContent(mapObj[0].caption);
       infoWindow.open({
         anchor: googleMapMarker,
         googleMap,
