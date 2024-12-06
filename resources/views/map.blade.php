@@ -70,13 +70,17 @@
     // global var
     let zoomGmaps = 10;
     let zoomLeaflet = 10;
-    const INIT_POS = {
+    const INITPOS = {
       lat: -8.6509,
       lng: 115.2194
     };
 
     // Leaflet.js Map
-    const leafletMap = L.map('leaflet-map').setView([INIT_POS.lat, INIT_POS.lng], zoomLeaflet);
+    const leafletMap = L.map('leaflet-map').setView([INITPOS.lat, INITPOS.lng], zoomLeaflet);
+
+    // const openStreetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    //   attribution: '&copy; OpenStreetMap contributors'
+    // }).addTo(leafletMap);
 
     const Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
       attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
@@ -87,8 +91,8 @@
     const googleMapDiv = document.getElementById('google-map');
     const googleMap = new google.maps.Map(googleMapDiv, {
       center: {
-        lat: INIT_POS.lat,
-        lng: INIT_POS.lng,
+        lat: INITPOS.lat,
+        lng: INITPOS.lng,
       },
       zoom: zoomGmaps,
     });
