@@ -26,16 +26,16 @@ Route::get('/tugas2', [MapController::class, 'tugas2'])->name('map.tugas2');
 // interactive -> digunakan untuk menampilakn view map dan form data
 Route::get('/interactive', [MapDataController::class, 'index'])->name('map.index');
 
-Route::get('/api/markers', [MapDataController::class, 'getMarkers']);
-Route::get('/api/markers/{id}', [MapDataController::class, 'getMarkerById']);
-Route::get('/api/polygons', [MapDataController::class, 'getPolygons']);
-Route::get('/api/polygons/{id}', [MapDataController::class, 'getPolygonById']);
-Route::post('/api/markers', [MapDataController::class, 'storeMarker']);
-Route::post('/api/polygons', [MapDataController::class, 'storePolygon']);
-Route::delete('/api/markers/{id}', [MapDataController::class, 'destroyMarker'])->name('marker.destroy');
-Route::delete('/api/polygons/{id}', [MapDataController::class, 'destroyPolygon'])->name('polygon.destroy');
-Route::put('/api/markers/{id}', [MapDataController::class, 'updateMarker'])->name('marker.update');
-Route::put('/api/polygons/{id}', [MapDataController::class, 'updatePolygon'])->name('polygon.update');
+// Route::get('/api/markers', [MapDataController::class, 'getMarkers']);
+// Route::get('/api/markers/{id}', [MapDataController::class, 'getMarkerById']);
+// Route::get('/api/polygons', [MapDataController::class, 'getPolygons']);
+// Route::get('/api/polygons/{id}', [MapDataController::class, 'getPolygonById']);
+// Route::post('/api/markers', [MapDataController::class, 'storeMarker']);
+// Route::post('/api/polygons', [MapDataController::class, 'storePolygon']);
+// Route::delete('/api/markers/{id}', [MapDataController::class, 'destroyMarker'])->name('marker.destroy');
+// Route::delete('/api/polygons/{id}', [MapDataController::class, 'destroyPolygon'])->name('polygon.destroy');
+// Route::put('/api/markers/{id}', [MapDataController::class, 'updateMarker'])->name('marker.update');
+// Route::put('/api/polygons/{id}', [MapDataController::class, 'updatePolygon'])->name('polygon.update');
 
 /*
     use App\Http\Controllers\MapDataController;
