@@ -90,8 +90,7 @@
     <p>Nama: I Made Cakra Pustaka</p>
     <p>NIM: 2105541118</p>
     <div class="btn-container">
-      <a class="button-30" href="/map">Latihan</a>
-      <a class="button-30" href="/tugas1">Tugas</a>
+      <a class="button-30" href="{{ route('map.tugas1') }}">Dashboard</a>
     </div>
   </div>
 </body>

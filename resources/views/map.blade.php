@@ -1,156 +1,173 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dasar Peta Interaktif</title>
+@section('title', 'Hands-on-Labs 1 Latihan')
 
-  <!-- Leaflet.js CDN -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+@section('content')
+<div class="container-fluid"> <!-- Info boxes -->
+  <!--begin::Row-->
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="card-title">Leaflet Map</h5>
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse"> <i data-lte-icon="expand" class="bi bi-plus-lg"></i> <i data-lte-icon="collapse" class="bi bi-dash-lg"></i> </button>
+            <button type="button" class="btn btn-tool" data-lte-toggle="card-remove"> <i class="bi bi-x-lg"></i> </button>
+          </div>
+        </div> <!-- /.card-header -->
+        <div class="card-body"> <!--begin::Row-->
+          <div class="row">
+            <div class="col-md-12">
+              <div id="leaflet-map"></div>
+            </div> <!-- /.col -->
+          </div> <!--end::Row-->
+        </div> <!-- ./card-body -->
+      </div> <!-- /.card-footer -->
+    </div> <!-- /.card -->
+  </div> <!-- /.col -->
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="card-title">Google Map</h5>
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse"> <i data-lte-icon="expand" class="bi bi-plus-lg"></i> <i data-lte-icon="collapse" class="bi bi-dash-lg"></i> </button>
+            <button type="button" class="btn btn-tool" data-lte-toggle="card-remove"> <i class="bi bi-x-lg"></i> </button>
+          </div>
+        </div> <!-- /.card-header -->
+        <div class="card-body"> <!--begin::Row-->
+          <div class="row">
+            <div class="col-md-12">
+              <div id="google-map"></div>
+            </div> <!-- /.col -->
+          </div> <!--end::Row-->
+        </div> <!-- ./card-body -->
+      </div> <!-- /.card-footer -->
+    </div> <!-- /.card -->
+  </div> <!-- /.col -->
+</div> <!--end::Container-->
+@endsection
 
-  <!-- Google Maps API -->
-  <script src="https://maps.googleapis.com/maps/api/js?key={{ config('app.google_maps_api_key') }}"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
+@prepend('style')
+<style>
+  #leaflet-map,
+  #google-map {
+    height: 400px;
+    margin: auto;
+  }
+</style>
+@endprepend
 
-    h1 {
-      text-align: center;
-      padding: 10px;
-    }
-
-    #leaflet-map,
-    #google-map {
-      height: 400px;
-      margin: 20px auto;
-      max-width: 90%;
-    }
-  </style>
-</head>
-
-<body>
-  <h1>Peta Interaktif dengan Laravel</h1>
-
-  <div id="leaflet-map"></div>
-  <div id="google-map"></div>
-
-  <script>
-    const mapsObj = [
-      {
-        lat: -8.6509,
-        lng: 115.2194,
-        caption: "<b>Universitas Udayana</b><br>Denpasar, Bali",
-        title: "Universitas Udayana",
-      },
-      {
-        lat: -8.635599413914395,
-        lng: 115.231830902144,
-        caption: "<b>Living World</b><br>Denpasar, Bali",
-        title: "Living World",
-      },
-      {
-        lat: -8.656362810443232,
-        lng: 115.2177578258145,
-        caption: "<b>Lapangan Puputan Badung (I Gusti Ngurah Made Agung)</b><br>Denpasar, Bali",
-        title: "Lapangan Puputan Badung (I Gusti Ngurah Made Agung)",
-      },
-      {
-        lat: -8.810300111629076,
-        lng: 115.16760910543631,
-        caption: "<b>Taman Budaya Garuda Wisnu Kencana</b><br>Badung, Bali",
-        title: "Taman Budaya Garuda Wisnu Kencana",
-      },
-    ];
-
-    // global var
-    let zoomGmaps = 10;
-    let zoomLeaflet = 10;
-    const INITPOS = {
+@push('scripts')
+<script>
+  const mapsObj = [{
       lat: -8.6509,
-      lng: 115.2194
-    };
+      lng: 115.2194,
+      caption: "<b>Universitas Udayana</b><br>Denpasar, Bali",
+      title: "Universitas Udayana",
+    },
+    {
+      lat: -8.635599413914395,
+      lng: 115.231830902144,
+      caption: "<b>Living World</b><br>Denpasar, Bali",
+      title: "Living World",
+    },
+    {
+      lat: -8.656362810443232,
+      lng: 115.2177578258145,
+      caption: "<b>Lapangan Puputan Badung (I Gusti Ngurah Made Agung)</b><br>Denpasar, Bali",
+      title: "Lapangan Puputan Badung (I Gusti Ngurah Made Agung)",
+    },
+    {
+      lat: -8.810300111629076,
+      lng: 115.16760910543631,
+      caption: "<b>Taman Budaya Garuda Wisnu Kencana</b><br>Badung, Bali",
+      title: "Taman Budaya Garuda Wisnu Kencana",
+    },
+  ];
 
-    // Leaflet.js Map
-    const leafletMap = L.map('leaflet-map').setView([INITPOS.lat, INITPOS.lng], zoomLeaflet);
+  // global var
+  let zoomGmaps = 10;
+  let zoomLeaflet = 10;
+  const INITPOS = {
+    lat: -8.6509,
+    lng: 115.2194
+  };
 
-    // const openStreetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    //   attribution: '&copy; OpenStreetMap contributors'
-    // }).addTo(leafletMap);
+  // Leaflet.js Map
+  const leafletMap = L.map('leaflet-map').setView([INITPOS.lat, INITPOS.lng], zoomLeaflet);
 
-    const Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-    }).addTo(leafletMap);
+  // const openStreetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  //   attribution: '&copy; OpenStreetMap contributors'
+  // }).addTo(leafletMap);
+
+  const Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+  }).addTo(leafletMap);
 
 
-    // Google Maps API Map
-    const googleMapDiv = document.getElementById('google-map');
-    const googleMap = new google.maps.Map(googleMapDiv, {
-      center: {
-        lat: INITPOS.lat,
-        lng: INITPOS.lng,
+  // Google Maps API Map
+  const googleMapDiv = document.getElementById('google-map');
+  const googleMap = new google.maps.Map(googleMapDiv, {
+    center: {
+      lat: INITPOS.lat,
+      lng: INITPOS.lng,
+    },
+    zoom: zoomGmaps,
+  });
+
+  const infoWindow = new google.maps.InfoWindow();
+
+  // gmaps Marker
+  const gmapsMarker = mapsObj.map((x) => {
+    const marker = new google.maps.Marker({
+      position: {
+        lat: x.lat,
+        lng: x.lng,
       },
-      zoom: zoomGmaps,
+      map: googleMap,
+      title: x.title,
     });
 
-    const infoWindow = new google.maps.InfoWindow();
+    marker.addListener('click', () => {
+      infoWindow.close();
 
-    // gmaps Marker
-    const gmapsMarker = mapsObj.map((x) => {
-      const marker = new google.maps.Marker({
-        position: {
-          lat: x.lat,
-          lng: x.lng,
-        },
-        map: googleMap,
-        title: x.title,
+      infoWindow.setContent(x.caption);
+
+      infoWindow.open({
+        anchor: marker,
+        googleMap,
       });
 
-      marker.addListener('click', () => {
-        infoWindow.close();
-
-        infoWindow.setContent(x.caption);
-
-        infoWindow.open({
-          anchor: marker,
-          googleMap,
-        });
-
-        zoomGmaps = 13;
-        googleMap.setZoom(zoomGmaps);
-        googleMap.panTo(marker.position);
-      });
-
-      infoWindow.addListener('closeclick', () => {
-        zoomGmaps = 10;
-        googleMap.setZoom(zoomGmaps);
-        googleMap.panTo(INITPOS);
-      });
-
-
+      zoomGmaps = 13;
+      googleMap.setZoom(zoomGmaps);
+      googleMap.panTo(marker.position);
     });
 
-    //  leaflet Marker
-    const leafletMarker = mapsObj.map((x) => {
-      const leafletMarker = L.marker([x.lat, x.lng]).bindPopup(x.caption).addTo(leafletMap);
-
-      leafletMarker.on('click', () => {
-        zoomLeaflet = 15;
-        leafletMap.flyTo(leafletMarker.getLatLng(), zoomLeaflet);
-        leafletMarker.openPopup();
-      });
-
-      leafletMarker.getPopup().on('remove', () => {
-        zoomLeaflet = 10;
-        leafletMap.flyTo(INITPOS, zoomLeaflet);
-      });
-
+    infoWindow.addListener('closeclick', () => {
+      zoomGmaps = 10;
+      googleMap.setZoom(zoomGmaps);
+      googleMap.panTo(INITPOS);
     });
-  </script>
-</body>
 
-</html>
+
+  });
+
+  //  leaflet Marker
+  const leafletMarker = mapsObj.map((x) => {
+    const leafletMarker = L.marker([x.lat, x.lng]).bindPopup(x.caption).addTo(leafletMap);
+
+    leafletMarker.on('click', () => {
+      zoomLeaflet = 15;
+      leafletMap.flyTo(leafletMarker.getLatLng(), zoomLeaflet);
+      leafletMarker.openPopup();
+    });
+
+    leafletMarker.getPopup().on('remove', () => {
+      zoomLeaflet = 10;
+      leafletMap.flyTo(INITPOS, zoomLeaflet);
+    });
+
+  });
+</script>
+@endpush
