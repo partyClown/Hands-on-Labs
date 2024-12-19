@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 
 class MapController extends Controller
 {
@@ -14,4 +13,17 @@ class MapController extends Controller
     public function tugas() {
         return view('map-tugas');
     }
+
+    public function tugas2() {
+        $resMarker = (new MapDataController)->getMarkers();
+        $jsonDataMarker = $resMarker->getContent();
+        $markerDatas = json_decode($jsonDataMarker);
+
+        $resPolygon = (new MapDataController)->getPolygons();
+        $jsonDataPolygon = $resPolygon->getContent();
+        $polygonDatas = json_decode($jsonDataPolygon);
+
+        return view('map-tugas2', compact('markerDatas', 'polygonDatas'));
+    }
+
 }
