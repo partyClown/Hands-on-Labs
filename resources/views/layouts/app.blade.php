@@ -14,9 +14,13 @@
     <!-- Leaflet.js CDN -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet routing machine -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
     <!-- Google Maps API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ config('app.google_maps_api_key') }}&loading=async" ></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ config('app.google_maps_api_key') }}&loading=async&libraries=places&libraries=marker&v=weekly" ></script>
+    <!-- <script src="https://maps.googleapis.com/maps/api/js?key={{ config('app.google_maps_api_key') }}&libraries=places"></script> -->
 
     @stack('style')
 </head>
@@ -70,7 +74,7 @@
                         </li>
                         <li class="nav-item {{ Route::is('map.tugas2') || Route::is('map.latihan2') ? 'menu-open' : '' }}"> <a href="#" class="nav-link"> <i class="nav-icon bi bi-list-task"></i>
                                 <p>
-                                    Hands-on-Lab 2
+                                    Hands-on-Lab 2, 3 & 4
                                     <i class="nav-arrow bi bi-chevron-right"></i>
                                 </p>
                             </a>
@@ -235,6 +239,7 @@
             });
         })();
     </script>
+
 </body><!--end::Body-->
 
 </html>

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Hands-on Lab 2 Tugas')
+@section('title', 'Hands-on Lab 2,3,4 Tugas')
 
 
 @section('content')
@@ -18,7 +18,7 @@
         </div> <!-- /.card-header -->
         <div class="card-body"> <!--begin::Row-->
           <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-12 text-black">
               <div id="map"></div>
             </div> <!-- /.col -->
           </div> <!--end::Row-->
@@ -26,6 +26,27 @@
       </div> <!-- /.card-footer -->
     </div> <!-- /.card -->
   </div> <!-- /.col -->
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="card-title">Google maps</h5>
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse"> <i data-lte-icon="expand" class="bi bi-plus-lg"></i> <i data-lte-icon="collapse" class="bi bi-dash-lg"></i> </button>
+            <button type="button" class="btn btn-tool" data-lte-toggle="card-remove"> <i class="bi bi-x-lg"></i> </button>
+          </div>
+        </div> <!-- /.card-header -->
+        <div class="card-body"> <!--begin::Row-->
+          <div class="row">
+            <div class="col-md-12">
+              <div id="google-map"></div>
+              <div id="sidebar"></div>
+            </div> <!-- /.col -->
+          </div> <!--end::Row-->
+        </div> <!-- ./card-body -->
+      </div> <!-- /.card-footer -->
+    </div> <!-- /.card -->
+  </div>
   <div class="row"> <!-- Start col -->
     <div class="col-md-12"> <!--begin::Row-->
       <div class="row g-4 mb-4">
@@ -189,12 +210,163 @@
 
   let markerMap = new Map();
   let polygonMap = new Map();
+  let currentPosition = {};
+
+  const googleMapElement = document.getElementById('google-map');
+  const sideBar = document.getElementById('sidebar');
+  const googleMap = new google.maps.Map(googleMapElement, {
+    center: {
+      lat: -8.7984047,
+      lng: 115.1698715,
+    },
+    zoom: 11,
+    mapId: "DEMO_MAP_ID",
+  });
+
+  // Layanan Directions
+  let directionsService = new google.maps.DirectionsService();
+  let directionsRenderer = new google.maps.DirectionsRenderer({
+    suppressMarkers: true,
+    preserveViewport: true,
+  });
+  const infoWindow = new google.maps.InfoWindow();
+
+  // Tampilkan rute di peta
+  directionsRenderer.setMap(googleMap);
+  directionsRenderer.setPanel(sideBar);
 
   const map = L.map('map').setView([INIT_POS.center.lat, INIT_POS.center.lng], INIT_POS.zoom);
 
   const tile = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(map);
+
+  function getLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(showPosition);
+    } else {
+      alert("Geolocation is not supported by this browser.");
+    }
+  }
+
+  
+
+  function showPosition(pos) {
+    const crd = pos.coords;
+    Object.assign(currentPosition, {
+      latitude: crd.latitude,
+      longitude: crd.longitude
+    });
+    const leafletMarker = L.marker([crd.latitude, crd.longitude])
+      .bindPopup(`<b>Current Position</b>`)
+      .addTo(map);
+    const gmapsMarker = new google.maps.marker.AdvancedMarkerElement({
+      position: {
+        lat: crd.latitude,
+        lng: crd.longitude,
+      },
+      map: googleMap,
+    });
+
+    gmapsMarker.addListener('click', () => {
+      infoWindow.close();
+      infoWindow.setContent("<b style='color: black;'>Current Position</b>");
+      infoWindow.open({
+        anchor: gmapsMarker,
+        googleMap,
+      });
+    });
+    return crd;
+  }
+
+  function smoothZoom(map, targetZoom, currentZoom) {
+    if (currentZoom === targetZoom) {
+      return;
+    }
+
+    let zoomStep = targetZoom > currentZoom ? 1 : -1;
+
+    google.maps.event.addListenerOnce(map, 'zoom_changed', function() {
+      smoothZoom(map, targetZoom, currentZoom + zoomStep);
+    });
+
+    const delay = 150;
+
+    setTimeout(function() {
+      map.setZoom(currentZoom);
+    }, delay);
+  }
+
+  function showLeafletRoute(key) {
+    const leafletMarker = markerMap.get(key);
+
+    leafletMarker.openPopup();
+    map.flyTo(leafletMarker.getLatLng(), 15);
+
+    const startPoint = L.latLng(currentPosition.latitude, currentPosition.longitude);
+    const endPoint = L.latLng(leafletMarker.getLatLng());
+
+    leafletRoute = L.Routing.control({
+      waypoints: [startPoint, endPoint],
+      routeWhileDragging: false,
+      createMarker: () => null,
+      fitSelectedRoutes: false,
+      lineOptions: {
+        styles: [{
+          color: 'blue',
+          weight: 5
+        }],
+        interactive: true
+      },
+    }).addTo(map);
+  }
+
+  function showGmapsRoute(key) {
+    const gmapsInfo = markerMap.get(key);
+    const gmapsMarker = gmapsInfo.getLatLng();
+    const {
+      marker,
+      info
+    } = gmapsInfo;
+
+    directionsRenderer.setMap(null);
+    directionsRenderer.setPanel(null);
+    directionsRenderer.setMap(googleMap);
+    directionsRenderer.setPanel(sideBar);
+    smoothZoom(googleMap, 16, googleMap.getZoom());
+    setTimeout(() => {
+      googleMap.panTo({
+        lat: parseFloat(gmapsMarker.lat),
+        lng: parseFloat(gmapsMarker.lng)
+      });
+    }, 300);
+
+    infoWindow.close();
+    infoWindow.setContent(`
+    <h4>
+      <b style='color: black;'>${info.name}</b>
+    </h4>
+    `);
+
+    infoWindow.open({
+      anchor: marker,
+      map: googleMap,
+    });
+
+    directionsService.route({
+      origin: {
+        lat: parseFloat(currentPosition.latitude),
+        lng: parseFloat(currentPosition.longitude),
+      },
+      destination: {
+        lat: parseFloat(gmapsMarker.lat),
+        lng: parseFloat(gmapsMarker.lng),
+      },
+      travelMode: google.maps.TravelMode.DRIVING,
+    }).then((response) => {
+      directionsRenderer.setDirections(response);
+    }).catch((e) => window.alert(e.message));
+  }
 
 
   function addMarkerToMap(markers, map) {
@@ -203,16 +375,44 @@
         .bindPopup(`<b>${marker.name}</b>`)
         .addTo(map);
 
+      // Google Maps Marker
+      const gmapsMarker = new google.maps.marker.AdvancedMarkerElement({
+        position: {
+          lat: parseFloat(marker.latitude),
+          lng: parseFloat(marker.longitude)
+        },
+        map: googleMap,
+      });
+
       const key = `${marker.latitude},${marker.longitude}`;
+      leafletMarker["marker"] = gmapsMarker;
+      leafletMarker["info"] = {
+        name: marker.name,
+        description: marker.description
+      };
       markerMap.set(key, leafletMarker);
 
       leafletMarker.on('click', () => {
-        map.flyTo(leafletMarker.getLatLng(), zoomIn);
-        leafletMarker.openPopup();
+        showLeafletRoute(key);
       });
 
       leafletMarker.on('popupclose', () => {
         map.flyTo(INIT_POS.center, INIT_POS.zoom);
+        leafletRoute.remove();
+      });
+
+      // marker listener & route
+      gmapsMarker.addListener('click', () => {
+        showGmapsRoute(key);
+      });
+
+      infoWindow.addListener('closeclick', () => {
+        smoothZoom(googleMap, 9, googleMap.getZoom());
+        setTimeout(() => {
+          googleMap.panTo(INIT_POS.center);
+          directionsRenderer.setMap(null);
+          directionsRenderer.setPanel(null);
+        }, 300);
       });
     });
   }
@@ -220,12 +420,14 @@
   function addPolygonToMap(polygons, map) {
     polygons.forEach((polygon) => {
       const latlngs = JSON.parse(polygon.coordinates);
-      const leafletPolygon = L.polygon(latlngs, {color: 'green'})
-      .bindPopup(`<b>Polygon ${polygon.id}<b>`)
-      .addTo(map);
+      const leafletPolygon = L.polygon(latlngs, {
+          color: 'green'
+        })
+        .bindPopup(`<b>Polygon ${polygon.id}<b>`)
+        .addTo(map);
 
       const key = `${polygon.id}`;
-      polygonMap.set(key,leafletPolygon);
+      polygonMap.set(key, leafletPolygon);
 
       leafletPolygon.on('click', () => {
         map.flyToBounds(leafletPolygon.getBounds());
@@ -267,6 +469,7 @@
   }
 
   function main(markers, polygons) {
+    getLocation();
     addMarkerToMap(markers, map);
     addPolygonToMap(polygons, map);
   }
@@ -276,16 +479,29 @@
 
   // Initialize the map with markers
   main(markerDatas, polygonDatas);
-
-
 </script>
 @endpush
 
 @prepend('style')
 <style>
-  #map {
+  #map,
+  #google-map {
     height: 400px;
     margin: auto;
+  }
+
+  #sidebar {
+    position: absolute;
+    top: 8rem;
+    right: 20px;
+    background: white;
+    padding: 10px;
+    border: 1px solid #ccc;
+    z-index: 5;
+    max-height: 25%;
+    max-width: 25%;
+    overflow-y: auto;
+    font-size: small;
   }
 </style>
 @endprepend
@@ -526,7 +742,7 @@
         }
       });
     } else {
-      
+
       Swal.fire("Error", "Polygon gagal di update!", "error");
     }
   }
